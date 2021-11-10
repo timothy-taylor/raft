@@ -26,6 +26,7 @@ local ACTIVE = {}
 local MAX_DELAYS = 3
 local ALT = false
 
+local brightness = 4
 local viewport = { width = 128, height = 64, frame = 1 }
 local wave = { counter = 1, spd = 8 }
 local knob = 11
@@ -180,13 +181,13 @@ end
 function waves(f)
     local half = viewport.height/2
     
-    screen.level(3) 
+    screen.level(brightness - 1) 
     for j = 1,viewport.width do 
         screen.pixel(j,half - math.random(-1,1)) 
     end
     screen.fill()
     
-    screen.level(4)
+    screen.level(brightness)
     for i = 1,#ACTIVE do
         local n = i * 10
         
@@ -223,18 +224,18 @@ function redraw()
     
     -- text    
     screen.move(4,viewport.height - 10 - spacer)
-    screen.level(2)
+    screen.level(brightness - 2)
     local string = ""
     if ALT then string = "drone" else string = "wave" end
     screen.text(string)
     screen.stroke()
     
     screen.move(10,10)
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.text("wave "..CURRENT.."/"..MAX_DELAYS)
     
     -- fb/frothRate knob
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move(0,0)
     screen.circle(viewport.width - (viewport.width/4), knob, knob)
     screen.fill()
@@ -249,13 +250,13 @@ function redraw()
         screen.stroke()
     end
 
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move((viewport.width - (viewport.width/4) + knob + spacer), knob + spacer)
     if ALT then screen.text("frth") else screen.text("fb") end
     screen.stroke()
     
     -- time/frothAmount knob
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move(0,0)
     screen.circle(viewport.width - (viewport.width/4), viewport.height - knob, knob)
     screen.fill()
@@ -270,7 +271,7 @@ function redraw()
         screen.stroke()
     end
     
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move((viewport.width - (viewport.width/4) + knob + spacer), viewport.height - knob + spacer)
     local string = ""
     if ALT then string = "frth" else string = "sec" end
@@ -278,7 +279,7 @@ function redraw()
     screen.stroke()
     
     -- vol/ocean knob
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move(0,0)
     screen.circle(viewport.width/2, viewport.height - knob, knob)
     screen.fill()
@@ -293,7 +294,7 @@ function redraw()
         screen.stroke()
     end
 
-    screen.level(2)
+    screen.level(brightness - 2)
     screen.move((viewport.width/2) - knob - 2, viewport.height - knob + spacer)
     if ALT then
         screen.text_right("ocn")
@@ -306,7 +307,7 @@ function redraw()
     -- forward/backwards
     local r = 9
     
-    screen.level(2)
+    screen.level(brightness - 2)
     if ALT then
         screen.circle(8,viewport.height-10/2,10/2)
     else
@@ -319,7 +320,7 @@ function redraw()
     screen.text("<-")
     screen.stroke()
 
-    screen.level(2)
+    screen.level(brightness - 2)
     if ALT then
         screen.circle(22,viewport.height-10/2,10/2)
     else
