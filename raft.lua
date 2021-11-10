@@ -13,17 +13,18 @@
 -- ALT + K2 = drone reverse
 -- ALT + K3 = drone forward
 --
--- drone = fb: 100; rec: 0
---
 -- while on wave 3/3 ->
--- K3 = clear buffers
--- & reset feedback
--- & re-enable record
+-- K3 = clears buffers, resets to single wave
 --
 -- ENCs control individual wave params
 -- ALT + ENCs control global ocean params
 
 engine.name = 'Ocean'
+
+local CURRENT = 1
+local ACTIVE = {}
+local MAX_DELAYS = 3
+local ALT = false
 
 local viewport = { width = 128, height = 64, frame = 1 }
 local wave = { counter = 1, spd = 8 }
@@ -33,11 +34,6 @@ local vib = { b = true }
 local p_ids = {{"waveOneFeedback", "waveOneTime", "waveOneLevel"},
                {"waveTwoFeedback", "waveTwoTime", "waveTwoLevel"},
                {"waveThreeFeedback", "waveThreeTime", "waveThreeLevel"}}
-
-CURRENT = 1
-ACTIVE = {}
-MAX_DELAYS = 3
-ALT = false
 
 function key(id, z) 
     if z == 1 then
@@ -64,17 +60,14 @@ function key(id, z)
             end
             
             if #ACTIVE < CURRENT then 
-                setup_new_delay_line(CURRENT)
-                params:delta(p_ids[CURRENT][2],CURRENT)
+                table.insert(ACTIVE,CURRENT)
+                softcut.rec_level(CURRENT,1)
             end
             
             if RESET then
-                CURRENT = 1 
-                softcut.buffer_clear()
-                
+                reset_delays()
                 for n=1,3 do
                     params:set(p_ids[n][1], 0.5)
-                    softcut.rec_level(n, 1)
                     params:set("Direction", 1.0)
                 end
             end
@@ -100,6 +93,15 @@ function enc(id, d)
     end
 end
 
+function reset_delays()
+    CURRENT = 1 
+    ACTIVE = { 1 }
+    softcut.buffer_clear()
+    softcut.rec_level(1, 1)
+    softcut.rec_level(2, 0)
+    softcut.rec_level(3, 0)
+end
+
 function setup_delay_params(n)
     local string = "Wave"..n
     params:add_separator(string)
@@ -110,12 +112,12 @@ function setup_delay_params(n)
         action=function(x) softcut.pre_level(n,x) end}
 
     local id_TIME = p_ids[n][2]
-    local cs_TIME = controlspec.new(0.1,30,'lin',0.01,0.55,'s')
+    local cs_TIME = controlspec.new(0.1,55,'lin',0.01,0.55 + (2 * (n - 1)),'s')
     params:add{type="control", id=id_TIME, controlspec=cs_TIME,
         action=function(x) softcut.loop_end(n,(get_loop_start(n) + x)) end}
 
    local id_LVL = p_ids[n][3]
-   local cs_LVL = controlspec.new(0.0,1.0,'lin',0,1.0,'')
+   local cs_LVL = controlspec.new(0.0,1.0,'lin',0,0.5,'')
    params:add{type="control", id=id_LVL, controlspec=cs_LVL,
        action=function(x) softcut.level(n,x) end}
 end
@@ -130,7 +132,7 @@ function setup_softcut_voice(n)
     
     softcut.loop(n,1)
     softcut.loop_start(n,get_loop_start(n))
-    softcut.loop_end(n,get_loop_start(n) + params:get(p_ids[n][3]))
+    softcut.loop_end(n,get_loop_start(n) + params:get(p_ids[n][2]))
     softcut.position(n,1)
    
     softcut.rec_level(n,1)
@@ -171,7 +173,6 @@ function get_loop_start(voice)
 end
 
 function setup_new_delay_line(voice)
-    table.insert(ACTIVE,voice)
     setup_delay_params(voice)
     setup_softcut_voice(voice)
 end
@@ -342,11 +343,11 @@ function setup_delay_globals()
     local cs_FRATE = controlspec.new(1,400,'lin',1,400,'')
     params:add{type="control", id="FrothRate", controlspec=cs_FRATE,
         action=function(x) froth.time = 1/x end}
-    local cs_FAMT = controlspec.new(0,0.4,'lin',0,0.08,'')
+    local cs_FAMT = controlspec.new(0,0.4,'lin',0,0,'')
     params:add{type="control", id="FrothAmount", controlspec=cs_FAMT,
         action=function(x)
             for n=1,#ACTIVE do softcut.rate_slew_time(n,x*2) end end}
-    local cs_OA = controlspec.new(0,0.2,'lin',0,0.05,'')
+    local cs_OA = controlspec.new(0,0.2,'lin',0,0,'')
     params:add{type="control", id="OceanAmp", controlspec=cs_OA,
         action=function(x) engine.amp(x) end}
     
@@ -377,14 +378,15 @@ function setup_ocean_metro()
 end
 
 function init()
-    softcut.buffer_clear()
-    
     setup_delay_globals() 
-    setup_new_delay_line(CURRENT)
+    for n=1,3 do
+        setup_new_delay_line(n)
+    end
+    reset_delays()
     setup_gui_metro() 
     setup_ocean_metro()
    
-    engine.amp(0.07)
+    engine.amp(0.0)
     audio.level_adc_cut(1)
     audio.level_eng_cut(.7)
 end
