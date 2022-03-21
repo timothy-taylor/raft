@@ -1,6 +1,6 @@
 ## raft
 
-version 0.8
+version 0.9
 
 for norns
 

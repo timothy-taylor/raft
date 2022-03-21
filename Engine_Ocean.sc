@@ -1,6 +1,6 @@
 Engine_Ocean : CroneEngine {
         var <synth;
-	var amp=1;
+	var amp=0.1;
 	var lfo=8;
 
         *new { arg context, doneCallback;
@@ -12,7 +12,7 @@ Engine_Ocean : CroneEngine {
 			var noise, x;
                         noise = WhiteNoise.ar(mul: 0.5, add: 0.1);
                         x = LPF.ar(in: noise, freq: SinOsc.kr(1/lfo).range(100,800));
-			            x = x + Splay.ar(FreqShift.ar(x, 1/(4..7)));
+			x = x + Splay.ar(FreqShift.ar(x, 1/(4..7)));
  
                         Out.ar(out, (x * amp));
 		}).add;
@@ -21,7 +21,7 @@ Engine_Ocean : CroneEngine {
 		
                 synth = Synth.new(\ocean, [
 			\out, context.out_b.index, 
-			\amp, 1, 
+			\amp, 0.1, 
 			\lfo, 8], 
 		context.xg);
 
