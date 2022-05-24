@@ -6,7 +6,6 @@ function delay.setup_globals(active, vibrato)
   froth = metro.init()
   froth.event = function() vibrato() end
 
-  params:add_separator("Raft")
   local cs_DIRRATE = controlspec.new(-2,2,'lin',0.1,1,'')
   params:add{type="control", id="Direction", name="Global Buffer Rate", controlspec=cs_DIRRATE, action=function(x) 
     for n=1,3 do

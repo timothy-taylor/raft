@@ -21,10 +21,10 @@
 
 engine.name = 'Ocean'
 
-local view = include 'lib/view'
 local wave = include 'lib/wave'
 local delay = include 'lib/delay'
 local param_ids = include 'lib/param_ids'
+local view = include 'lib/view'
 
 local CURRENT = 1
 local ACTIVE = {}
@@ -106,18 +106,18 @@ function redraw()
 
   -- text    
   screen.move(4,view.height - 10 - view.spacer)
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   local string = ""
   if ALT then string = "drone" else string = "wave" end
   screen.text(string)
   screen.stroke()
 
   screen.move(10,10)
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.text("wave "..CURRENT.."/"..MAX_DELAYS)
 
   -- fb/frothRate knob
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move(0,0)
   screen.circle(view.width - (view.width/4), view.knob, view.knob)
   screen.fill()
@@ -132,13 +132,13 @@ function redraw()
     screen.stroke()
   end
 
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move((view.width - (view.width/4) + view.knob + view.spacer), view.knob + view.spacer)
   if ALT then screen.text("rate") else screen.text("fb") end
   screen.stroke()
 
   -- time/frothAmount knob
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move(0,0)
   screen.circle(view.width - (view.width/4), view.height - view.knob, view.knob)
   screen.fill()
@@ -153,7 +153,7 @@ function redraw()
     screen.stroke()
   end
 
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move((view.width - (view.width/4) + view.knob + view.spacer), view.height - view.knob + view.spacer)
   local string = ""
   if ALT then string = "dpth" else string = "sec" end
@@ -161,7 +161,7 @@ function redraw()
   screen.stroke()
 
   -- vol/ocean knob
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move(0,0)
   screen.circle(view.width/2, view.height - view.knob, view.knob)
   screen.fill()
@@ -176,7 +176,7 @@ function redraw()
     screen.stroke()
   end
 
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   screen.move((view.width/2) - view.knob - 2, view.height - view.knob + view.spacer)
   if ALT then
     screen.text_right("ocn")
@@ -189,7 +189,7 @@ function redraw()
   -- forward/backwards
   local r = 9
 
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   if ALT then
     screen.circle(8,view.height-10/2,10/2)
   else
@@ -202,7 +202,7 @@ function redraw()
   screen.text("<-")
   screen.stroke()
 
-  screen.level(view.brightness - 2)
+  screen.level(params:get("viewBrightness") - 2)
   if ALT then
     screen.circle(22,view.height-10/2,10/2)
   else
@@ -262,6 +262,9 @@ function init()
       end
     end
   end
+
+  params:add_separator("Raft")
+  params:add{type="number", id="viewBrightness", name="Brightness", min=3, max=15, default=15}
 
   delay.setup_globals(ACTIVE, vibrato) 
   for n=1,3 do

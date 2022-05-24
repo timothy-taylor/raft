@@ -4,8 +4,11 @@ view.width = 128
 view.height = 64
 view.frame = 1 
 view.knob = 11 
-view.brightness = 15
 view.spacer = 1.5
+
+function view.get_brightness()
+  return params:get("viewBrightness")
+end
 
 function view.increment_frame() 
   view.frame = (view.frame + 1) % view.width 
@@ -15,13 +18,13 @@ function view.waves(num_waves, wave_count)
     local f = view.frame
     local half = view.height/2
     
-    screen.level(view.brightness - 1) 
+    screen.level(params:get("viewBrightness") - 1) 
     for j = 1,view.width do 
         screen.pixel(j,half - math.random(-1,1)) 
     end
     screen.fill()
     
-    screen.level(view.brightness)
+    screen.level(params:get("viewBrightness"))
     for i = 1,num_waves do
         local n = i * 10
         
